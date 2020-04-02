@@ -59,8 +59,16 @@ const styles = () => ({
 
 class DepositContainer extends React.Component {
 
+    constructor () {
+        super()
+        this.handleDaiInput = this.handleDaiInput.bind(this)
+        this.handleUsdcInput = this.handleUsdcInput.bind(this)
+        this.handleUsdtInput = this.handleUsdtInput.bind(this)
+        this.handleSusdInput = this.handleSusdInput.bind(this)
+    }
+
     deposit () {
-        selectiveDeposit.bind(this)()
+        selectiveDeposit.call(this)
     }
 
     handleDaiInput(event) {
@@ -94,7 +102,7 @@ class DepositContainer extends React.Component {
         const { store } = this.props
         try { store.set('susdDepositAmount', new SixDecimal(event.target.value)) }
         catch {
-            if (event.target.value.length == 0) store.set('susdDepositAmount', new SixDecimal(0))
+            if (event.target.value.length === 0) store.set('susdDepositAmount', new SixDecimal(0))
         }
     }
 
@@ -125,7 +133,7 @@ class DepositContainer extends React.Component {
                         value={daiDepositAmount.toString() !== "0" ? daiDepositAmount : ''}
                         variant="outlined"
                         type="number"
-                        onChange={this.handleDaiInput.bind(this)}
+                        onChange={ e => this.handleDaiInput(e) }
                         InputProps={{ 
                             inputProps: { min: 0 }, 
                             endAdornment: <InputAdornment position="end"> DAI </InputAdornment>,
@@ -141,7 +149,7 @@ class DepositContainer extends React.Component {
                         value={usdcDepositAmount.toString() !== "0" ? usdcDepositAmount : ''}
                         variant="outlined"
                         type="number"
-                        onChange={this.handleUsdcInput.bind(this)}
+                        onChange={ e => this.handleUsdcInput(e) }
                         InputProps={{
                             inputProps: { min: 0 }, 
                             endAdornment: <InputAdornment position="end">USDC</InputAdornment>,
@@ -157,7 +165,7 @@ class DepositContainer extends React.Component {
                         value={usdtDepositAmount.toString() !== "0" ? usdtDepositAmount : ''}
                         variant="outlined"
                         type="number"
-                        onChange={this.handleUsdtInput.bind(this)}
+                        onChange={ e => this.handleUsdtInput(e) }
                         InputProps={{
                             inputProps: { min: 0 }, 
                             endAdornment: <InputAdornment className={classes.endAdornment} position="end">USDT</InputAdornment>,
@@ -173,7 +181,7 @@ class DepositContainer extends React.Component {
                         value={susdDepositAmount.toString() !== "0" ? susdDepositAmount : ''}
                         variant="outlined"
                         type="number"
-                        onChange={this.handleSusdInput.bind(this)}
+                        onChange={ e => this.handleSusdInput(e) }
                         InputProps={{
                             inputProps: { min: 0 }, 
                             endAdornment: <InputAdornment className={classes.endAdornment} position="end">SUSD</InputAdornment>,
@@ -184,7 +192,7 @@ class DepositContainer extends React.Component {
                 <Box className={classes.actionButtonContainer}>
                     <Button color='primary'
                         size='large'
-                        onClick={() => { this.deposit() }} 
+                        onClick={ () => { this.deposit() }} 
                         variant="contained" 
                         disabled={!isSignedIn } 
                         className={classes.actionButton}

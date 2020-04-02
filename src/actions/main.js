@@ -1,43 +1,6 @@
-import config from '../kovan.config.json'
+import config from '../mainnet.config.json'
 
 const loihiAddress = config.LOIHI
-
-export const exit = async function() {
-    const { store } = this.props
-    const web3 = store.get('web3')
-    const chai = store.get('chaiObject')
-    const exitAmount = store.get('exitAmount').mul(10**18)
-    const walletAddress = store.get('walletAddress')
-    return chai.methods.exit(walletAddress, exitAmount.toFixed()).send({from: walletAddress})
-}
-
-export const join = async function() {
-    const { store } = this.props
-    const web3 = store.get('web3')
-    const chai = store.get('chaiObject')
-    const dai = store.get('daiObject')
-    const joinAmount = store.get('joinAmount').mul(10**18)
-    const walletAddress = store.get('walletAddress')
-    const allowance = store.get('daiAllowance')
-    if (joinAmount.cmp(allowance)>0) {
-      return dai.methods.approve(chai.options.address, "-1")
-        .send({from: walletAddress})
-        .then(function () {
-          return chai.methods.join(walletAddress, joinAmount.toFixed()).send({from: walletAddress})
-        });
-    }
-    return chai.methods.join(walletAddress, joinAmount.toFixed()).send({from: walletAddress})
-}
-
-export const transfer = async function() {
-    const { store } = this.props
-    const web3 = store.get('web3')
-    const chai = store.get('chaiObject')
-    const transferAmount = store.get('transferAmount').mul(10**18)
-    const transferAddress = store.get('transferAddress')
-    const walletAddress = store.get('walletAddress')
-    return chai.methods.transfer(transferAddress, transferAmount.toFixed()).send({from: walletAddress})
-}
 
 export const selectiveDeposit = async function () {
     const { store } = this.props
@@ -50,7 +13,7 @@ export const selectiveDeposit = async function () {
     const amounts = []
 
     if (store.get('daiDepositAmount') > 0){
-        const daiObject = store.get('daiObject');
+        const daiObject = store.get('daiObject')
         contracts.push(daiObject)
         addresses.push(daiObject.options.address)
         amounts.push(store.get('daiDepositAmount').mul(10**18).toFixed())
@@ -83,73 +46,52 @@ export const selectiveDeposit = async function () {
     const gasPrice = await web3.eth.getGasPrice()
     console.log("gas price", gasPrice)
 
+    console.log("CONTRACTS", contracts)
+    console.log("AMOUNTS", amounts)
+    console.log("ADDRESSES", addresses)
 
-    // contracts[0].methods.approve(loihiAddress, amounts[0]).estimateGas({from: walletAddress, gasPrice: gasPrice })
-    //     .then(function () {
+    return senseApprovals()
+        .then(assureApprovals)
+        .then(doDeposit)
+        .then(complete)
+        .catch(triage)
 
-    //     }).catch(function (err) {
-    //         console.log("err", arguments)
-    //     })
-    // console.log("Estimate", estimate)
+    function senseApprovals () {
+        return Promise.all(contracts.map(contract => {
+            return contract.methods.allowance(walletAddress, loihiAddress).call()
+        }))
+    }
 
 
-    // const amount = await contracts[0].methods.approve(loihiAddress, 0).estimateGas({from: walletAddress })
-
-    // console.log("amounts", amounts)
-
-    return Promise.all(contracts.map(contract => {
-        return contract.methods.allowance(walletAddress, loihiAddress).call()
-    })).then(function (approvals) {
-
-        console.log("current approvals", approvals)
-
+    function assureApprovals (approvals) {
+        console.log("approvals", approvals)
         return Promise.all(approvals.map((approval, ix) => {
-            console.log("approval", typeof approval)
-            console.log(" <= ", approval <= amounts[ix])
-            console.log("amounts[ix]", typeof amounts[ix])
-            // console.log(" >= ", approval >= amounts[ix])
-
             if (Number(approval) <= Number(amounts[ix])) {
-                console.log("yes")
-
                 if (contracts[ix].name !== 'Usdt' || (contracts[ix].name == 'Usdt' && amounts[ix] == 0)) {
-
                     return contracts[ix].methods.approve(loihiAddress, "-1").send({ from: walletAddress })
-
                 } else return Promise.all([
                     contracts[ix].methods.approve(loihiAddress, 0).send({ from: walletAddress }),
                     contracts[ix].methods.approve(loihiAddress, "-1").send({ from: walletAddress })
                 ])
-
             } else {
-                console.log("no")
                 return Promise.resolve()
             }
-
         }))
-        
-    }).then(async function () {
+    }
 
+    async function doDeposit () {
+        console.log("do deposit")
         const tx = loihi.methods.selectiveDeposit(addresses, amounts, 1, Date.now() + 2000)
         const estimate = await tx.estimateGas({from: walletAddress})
         console.log("estimate", estimate)
-        console.log("gasPrice", gasPrice)
-        return tx.send({ from: walletAddress, gas: Math.round(estimate * 1.1), gasPrice: gasPrice})
+        console.log("estimate * 1.5", estimate * 1.5)
+        return tx.send({ from: walletAddress, gas: Math.floor(estimate * 1.5), gasPrice: gasPrice})
+        
+    }
 
-    }).then(function () { 
+    function complete () { console.log("complete")    }
 
-        console.log("estimated", arguments)
-    
-    }).catch(function () {
-
-        console.log("Err", arguments)
-
-    })
-    // .then(function () {
-    //     return loihi.methods.selectiveDeposit(addresses, amounts, 1, Date.now() + 2000).send({from: walletAddress})
-    // }).then(function () {
-
-    // })
+    function triage (err) { console.log("err", err) }
 
 }
 
@@ -158,12 +100,14 @@ export const proportionalWithdraw = async function () {
 
     const web3 = store.get('web3')
     const walletAddress = store.get('walletAddress')
-    const loihiBalanceRaw = store.get('loihiBalanceDecimal').mul(10**18).toFixed()
+    const shellBalanceRaw = store.get('shellBalanceRaw')
+    console.log("shell ballance", store.get("shellBalance"))
     const loihi = store.get('loihiObject')
 
-    const tx = loihi.methods.proportionalWithdraw(loihiBalanceRaw)
+    const tx = loihi.methods.proportionalWithdraw(shellBalanceRaw)
 
     return tx.estimateGas({from: walletAddress}).then(function () {
+        console.log("GAS", arguments[0])
         return tx.send({from: walletAddress, gas: Math.floor(arguments[0] * 1.2) })
     }).then(function () {
         console.log("done withdraw", arguments)
@@ -171,12 +115,13 @@ export const proportionalWithdraw = async function () {
 
 }
 
-export const primeOriginTrade = async function (value) {
+export const primeSwap = async function (value) {
     const { store } = this.props
+    value = Number(value)
 
-    console.log("prime origin trade", value)
+    const isOrigin = store.get('isOriginSwap')
 
-    store.set('originAmount', value)
+    console.log("prime swap", typeof value, value)
 
     const walletAddress = store.get('walletAddress')
     const loihi = store.get('loihiObject')
@@ -187,30 +132,42 @@ export const primeOriginTrade = async function (value) {
     const target = contracts[targetSlot]
     if (!walletAddress || !loihi) return
 
-    const rawOrigin = origin.getRaw(value)
-    console.log("raworig", rawOrigin)
+    const rawValue = isOrigin
+        ? origin.getRaw(value)
+        : target.getRaw(value)
 
-    const rawTarget = await loihi.methods.viewOriginTrade(origin.options.address, target.options.address, rawOrigin).call()
-    console.log("raw target", rawTarget);
+    const numberOfChickensOnOtherSideOfRoad = isOrigin
+        ? await loihi.methods.viewOriginTrade(origin.options.address, target.options.address, rawValue).call()
+        : await loihi.methods.viewTargetTrade(origin.options.address, target.options.address, rawValue).call()
 
-    // const contracts = store.get('contractObjects')
-    // const origin = contracts[originSlot]
-    // const target = contracts[targetSlot]
+    console.log("raw value", rawValue, typeof rawValue)
 
-    // store.set('rawOriginAmount', value)
+    if (isOrigin) {
+        store.set("rawOriginAmount", rawValue) 
+        store.set("rawTargetAmount", numberOfChickensOnOtherSideOfRoad)
+    } else {
+        store.set("rawTargetAmount", rawValue) 
+        store.set("rawOriginAmount", numberOfChickensOnOtherSideOfRoad)
+    }
 
-    // loihi.methods.viewOriginTrade(origin.options.address, target.options.address, value).call()
-    //     .then(function () {
-    //         console.log("viewed", arguments)
-    //     })
+    if (isOrigin) {
+        store.set('originAmount', origin.getDecimal(value))
+        store.set('targetAmount', target.getDisplay(numberOfChickensOnOtherSideOfRoad))
+    } else {
+        store.set('originAmount', origin.getDisplay(numberOfChickensOnOtherSideOfRoad))
+        store.set('targetAmount', target.getDecimal(value))
+    }
+
+    console.log("number of chickens", numberOfChickensOnOtherSideOfRoad)
 
 }
 
 export const swap = async function () {
 
     const { store } = this.props
+
     const walletAddress = store.get('walletAddress')
-    const rawOriginAmount = store.get('rawOriginAmount')
+
     const loihi = store.get('loihiObject')
     const originSlot = store.get('originSlot')
     const targetSlot = store.get('targetSlot')
@@ -218,12 +175,48 @@ export const swap = async function () {
     const origin = contracts[originSlot]
     const target = contracts[targetSlot]
 
-    origin.methods.approve(loihi.options.address, rawOriginAmount).send({ from: walletAddress })
-        .then(function () {
-            return loihi.methods.swapByOrigin( origin.options.address, target.options.address, rawOriginAmount, 0, Date.now() + 500 ).send({ from : walletAddress })
-        }).then(function () {
-            console.log("traded", arguments)
-        })
+    const isOrigin = store.get('isOriginSwap')
+
+    const rawOrigin = store.get('rawOriginAmount')
+    const rawTarget = store.get('rawTargetAmount')
+
+
+    console.log("origin", origin)
+    console.log("target", target)
+    console.log("raw origin amount", rawOrigin)
+    console.log("raw target amount", rawTarget)
+
+    origin.methods.allowance(walletAddress, loihiAddress).call()
+        .then(assureApproval)
+        .then(doSwap)
+        .then(complete)
+
+    function assureApproval (approval) {
+        if (Number(approval) < rawOrigin) {
+            if (origin.name !== 'Usdt' || (origin.name == 'Usdt' && approval == 0)) {
+                return origin.methods.approve(loihiAddress, rawOrigin).send({ from: walletAddress })
+            } else {
+                return Promise.all([
+                    origin.methods.approve(loihiAddress, 0).send({ from: walletAddress }),
+                    origin.methods.approve(loihiAddress, isOrigin ? rawOrigin : rawOrigin * 1.01).send({ from: walletAddress })
+                ])
+            }
+        } else return Promise.resolve()
+    }
+
+    function doSwap () {
+        return loihi.methods.swapByOrigin(
+            origin.options.address, 
+            target.options.address, 
+            isOrigin ? rawOrigin : rawOrigin * 1.01, 
+            isOrigin ? rawTarget * .99 : rawTarget, 
+            Date.now() + 500 
+        ).send({ from : walletAddress })
+    }
+
+    function complete () {
+
+    }
 
 }
 
@@ -231,8 +224,4 @@ export const setViewState = async function (index) {
     this.props.store.set('viewState', index)
 }
 
-export default {
-    join,
-    exit,
-    transfer,
-}
+export default { }

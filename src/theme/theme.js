@@ -12,65 +12,26 @@ export default createMuiTheme({
         secondary: grey,
     },
     overrides: {
-        // Style sheet name ⚛️
-        // MuiButton: {
-        //   // Name of the rule
-        //   text: {
-        //     // Some CSS
-        //     color: 'white',
-        //   },
-        // }
-        MuiTypography: {
-            body1: { color: '#EBEBEB !important' }
-        },
-        PrivateNotchedOutline: {
-            root: {
-            }
-        },
-        // '.MuiOutlinedInput-root:hover':{
-        //     borderColor: '#EBEBEB !important'
-        // },
         MuiInputAdornment: {
             root: { color: '#EBEBEB !important' },
             positionEnd: { color: '#EBEBEB !important' }
         },
-        MuiFormHelperText: {
-            root: {
-                color: '#EBEBEB !important',
-            }
-        },
-        MuiFormLabel: {
-            root: {
-                color: '#EBEBEB !important',
-            }
-        },
-        MuiInput: {
-            root: {
-                fontSize: '100px'
-            }
-        },
+        MuiFormHelperText: { root: { color: '#EBEBEB !important', } },
+        MuiFormLabel: { root: { color: '#EBEBEB !important', } },
+        MuiTypography: { body1: { color: '#EBEBEB !important' } },
+        MuiTextField: { fontSize: 14 },
+        MuiMenuItem: { root: { /* color: '#EBEBEB', fontSize: 14 */ } },
+        MuiInput: { root: { fontSize: '20px' } },
+        MuiDisabled: { display: 'none' }, 
         MuiOutlinedInput: {
             root:{
-            //     '&:hover': {
-            //         // notchedOutline: {
-            //             borderColor: '#EBEBEB'
-            //         // }
-            //     }
-                color: '#EBEBEB !important',
+                color: 'lightblue !important',
                 height: '70px',
                 fontSize: '27.5px',
-                fontWeight: 100
+                fontWeight: 100,
+                '& $notchedOutline': { borderWidth: '1.5px !important', borderColor: 'lightblue !important' },
+                '&$disabled $notchedOutline': { borderWidth: '2px !important', borderColor: '#6d858c !important' },
             },
-            notchedOutline: {
-                display: 'none',
-                borderColor: '#EBEBEB !important',
-                borderWidth: '1px !important'
-            }
-        },
-        MuiTextField: {
-            root: {
-            }
-
         },
         MuiToggleButtonGroup: {
           grouped: {
@@ -79,7 +40,6 @@ export default createMuiTheme({
             }
           }
         },
-        // .MuiToggleButtonGroup-grouped:not(:first-child)
         MuiToggleButton: {
             root: {
                 border: '1px solid #EBEBEB',

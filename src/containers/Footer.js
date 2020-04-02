@@ -2,7 +2,7 @@ import React from 'react'
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles'
 import theme from '../theme/theme'
-import config from '../kovan.config.json'
+import config from '../mainnet.config.json'
 
 import Grid from '@material-ui/core/Grid'
 

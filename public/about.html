@@ -41,22 +41,23 @@ footer {
   </head>
   <body>
     <h1 id="chai-a-simple-erc20-wrapper-over-the-dai-savings-rate">Chai – A simple ERC20 wrapper over the Dai Savings Rate</h1>
-<p>Today we are introducing <code>Chai</code>, an ERC20 token that lets you earn interest on Dai without requiring it to be locked in the Dai Savings Rate. It can be transferred freely and is always redeemable for an ever growing amount of Dai. Interact with the Chai contract at <a href="https://chai.money">chai.money</a>.</p>
-<p>Chai lives on the Ethereum mainnet at address <code>0x06AF07097C9Eeb7fD685c692751D5C66dB49c215</code>.</p>
-<p class="logo">
-<img src="https://i.imgur.com/DbTXS3b.gif" alt="" /><br />
-Something's brewing...</p>
-<h2 id="what-is-chai-">What is Chai?</h2>
-<p>With the launch of multi-collateral Dai, Dai holders can earn risk-free interest on their coins using the Dai Savings Contract, also known as the <code>Pot</code>. The interest is funded out of the stability fees paid by CDP users, and is 2% per year at the time of writing. Even though Dai deposited in the savings contract remains instantly redeemable, interest accruing Dai cannot be directly transferred, or used in other dapps. Chai solves this by essentially &quot;unlocking&quot; your Dai savings balance, making it transferable, fungible, and ready for further DeFi integrations.</p>
-<p>When you convert your Dai to Chai, you receive a corresponding balance in the Chai contract. While your Chai balance remains constant, its corresponding Dai value grows with the Dai Savings Rate. You can think of it as Dai <em>brewing</em> in the Chai contract. At any point in time you can redeem your Dai along with additional interest, or continue to use the Chai token directly.</p>
-<h2 id="what-does-it-do-">What does it do?</h2>
-<p>Besides the standard ERC20 functions for transferring Chai, we want to highlight some additional features of the contract. For more information about the <code>chai.sol</code> contract, check out the <a href="https://github.com/dapphub/chai">README</a>.</p>
-<h3 id="dai-deposits-and-withdrawals">Dai deposits and withdrawals</h3>
-<p>A Dai user can convert their Dai into Chai at any point, by calling <code>join</code>. Likewise, they can convert their Chai into Dai at any point, by calling <code>exit</code>.</p>
-<h3 id="dai-denominated-transfers-and-withdrawals">Dai-denominated transfers and withdrawals</h3>
-<p>With the amount of Dai redeemable for one Chai constantly growing, the contract offers a few helper functions that operate on Chai balances in terms of their underlying Dai value.
-For example, with the method <code>move(address sender, address receiver, uint value)</code>, the <code>sender</code> will transfer just enough Chai to ensure that the <code>receiver</code> gets an amount of Chai worth <code>value</code> Dai (the exact amount of Chai transferred is determined when the transaction is included in a block). </p>
-<p>Similarly, the <code>draw</code> function lets users withdraw Dai by specify the amount of Dai they wish to redeem.</p>
+    <p>Today we are introducing Loi'hi <code>Shell Protocol</code>, an automated market maker that allows you to trade between stablecoins in a decentralized fashion with very low slippage.</p>
+    <p>Loi'hi lives on Etherum mainnet at address <code>0x06AF07097C9Eeb7fD685c692751D5C66dB49c215</code>.</p>
+    <p class="logo"> </p>
+    <h2 id="what-is-automated-market-maker-">What is an automated market maker?</h2>
+    <p> Automated market makers are smart contracts that contain logic by which trades are made. Users with extra capital can deposit it into the Shell Protocol and partake in the trading fees. </p>
+    <p> The Shell Protocol is designed specifically for trading stablecoins, which means that everything trades more or less at a 1:1 parity between pairs. </p>
+    <p> Every time a trade is executed, a small fee is kept by the protocol. These fees accrue to the holders of Shell Tokens, which is what the user receives in return for staking their capital to the protocol.</p>
+    <h2 id="what-are-shell-tokens-">What are shell tokens?</h2>
+    <p> Every time a user provides liquidity to the pools of the Shell Protocol, they receive Shell tokens representing their contribution to that particular pool. </p>
+    <p> As the pools gain fees through trades, the Shell Tokens accrue these fees and become more valuable. As the pool processes transactions, the stablecoins that Shell tokens are redeemable for increases. </p>
+    <h2 id="deposits-and-withdrawals-">Deposits and Withdrawals </h2>
+    <p> Users can deposit into the pool selectively or proportionally. That means they can deposit any number of any supported coin, or they can have the contract calculate what value of each supported coin the user will deposit as to avoid any slippage. </p>
+    <h2 id="what-is-slippage">What is slippage? </h2>
+    <p> In standard trading, slippage is the gap between the bid and the ask, which are both submitted by users. However, in an automated market maker, prices aren't set by users. They are set by the bonding curve. </p>
+    <p> An automated market maker's bonding curve can be designed in several ways. Slippage plays an integral role in each of them - it is what allows the prices to stay in line with the market. </p>
+    <p> When a trade is made in an automated market maker, it changes the balances of the residing liquidity, and therefore it also changes the price of the assets. The change in this price in relation to the size of the trade is what comprises slippage for an automated market maker. </p>
+    <p> Due to slippage, autmated market makers can move along with the market external to it. If there is an arbitrage opportunity, users will buy low on an automated market maker and sell high at another exchange, driving all prices to equilibrium. </p>
 <h3 id="support-for-gasless-token-interactions">Support for gasless token interactions</h3>
 <p>Paying gas for transactions that primarily deal with tokens creates unnecessary friction and positions tokens as second-class citizens in the Ethereum ecosystem. While there are many ways of dealing with this problem, both the Chai and the Dai contract provide a particularly simple and general solution by allowing approvals to be done with a signed message (known as a <code>permit</code>) in the ERC20 directly.</p>
 <p>While designing the <code>dai.sol</code> token contract, we experimented with various ways of performing token operations using signatures, until we realized that the only operation that had to be added to the contract directly was <code>permit</code>. </p>

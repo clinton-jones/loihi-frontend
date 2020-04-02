@@ -3,7 +3,7 @@ import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles'
 import theme from '../theme/theme'
 import { initBrowserWallet } from '../utils/web3Utils'
-import config from '../kovan.config.json'
+import config from '../mainnet.config.json'
 
 import Grid from '@material-ui/core/Grid'
 import Button from '@material-ui/core/Button'
@@ -51,6 +51,7 @@ const styles = () => ({
 })
 
 class LoginStateContainer extends React.Component {
+  
   async componentDidMount() {
     console.log("did mount")
     initBrowserWallet.call(this)

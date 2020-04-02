@@ -2,7 +2,7 @@ import React from 'react';
 import {withStore} from '@spyna/react-store'
 import {withStyles} from '@material-ui/styles';
 import theme from '../theme/theme'
-import { swap, primeOriginTrade } from '../actions/main'
+import { swap, primeSwap } from '../actions/main'
 
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -12,12 +12,6 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
-
-import usdcIcon from '../assets/usdc.svg'
-import daiIcon from '../assets/dai.svg'
-import asusdIcon from '../assets/aSUSD.svg'
-import susdIcon from '../assets/susd.svg'
-import usdtIcon from '../assets/usdt.svg'
 
 
 const styles = () => ({
@@ -53,20 +47,10 @@ class TradeContainer extends React.Component {
 
     constructor () {
         super()
-        this.coins = [
-            "USDt",
-            "USDc",
-            "Dai",
-            "CDai",
-            "Chai",
-            "cUSDc"
-        ]
-
         this.handleOriginInput = this.handleOriginInput.bind(this)
         this.handleTargetInput = this.handleTargetInput.bind(this)
-        this.handleOrigindSelect = this.handleOriginSelect.bind(this)
+        this.handleOriginSelect = this.handleOriginSelect.bind(this)
         this.handleTargetSelect = this.handleTargetSelect.bind(this)
-
     }
 
     swap() {
@@ -74,40 +58,30 @@ class TradeContainer extends React.Component {
     }
 
     handleOriginSelect (e) { 
+        e.preventDefault()
         const { store } = this.props
         store.set('originSlot', e.target.value)
-        console.log('hello', e.target.value)
-        console.log('store.get', store.get('originSlot'))
     }
 
     handleTargetSelect (e) { 
+        e.preventDefault()
         const { store } = this.props
         store.set('targetSlot', e.target.value)
     }
 
     handleOriginInput(e) {
+        e.preventDefault()
         const { store } = this.props
-        primeOriginTrade.call(this, e.target.value)
+        store.set('isOriginSwap', true)
+        primeSwap.call(this, e.target.value)
     }
 
-    handleTargetInput (event) {
-
-    }
-
-    setSlot (type, event) {
+    handleTargetInput (e) {
+        e.preventDefault()
         const { store } = this.props
-        store.set(type, event.target.value)
+        store.set('isOriginSwap', false)
+        primeSwap.call(this, e.target.value)
     }
-
-    slotTarget () {
-
-    }
-
-    setMax() {
-      const {store} = this.props
-      const chaiBalanceDecimal = store.get('chaiBalanceDecimal')
-    }
-
 
     render() {
         const {classes, store} = this.props
@@ -122,8 +96,8 @@ class TradeContainer extends React.Component {
 
         return (
             <Grid>
-                <Grid container alignItems="start" spacing={3}>
-                    <Grid item xs='9' sm='9' md='9'>
+                <Grid container spacing={3}>
+                    <Grid item xs={9} sm={9} md={9} lg={9}>
                         <TextField label={coins[originSlot].name}
                             placeholder='0'
                             className={classes.input}
@@ -131,46 +105,54 @@ class TradeContainer extends React.Component {
                             variant="outlined"
                             type="number"
                             onChange={ (e) => this.handleOriginInput(e) }
-                            value={originAmount}
+                            value={originAmount.toString() !== "0" ? originAmount : ''}
                             InputProps={{
                                 inputProps: { min: 0 }, 
                                 startAdornment: <InputAdornment position="start"> <img className={classes.iconInBox} src={coins[originSlot].icon}/> </InputAdornment> 
                             }}
-                        />
+                        >
+                            <TextField 
+                                select
+                                onChange={ (e) => this.handleOriginSelect(e) }
+                                value={originSlot}
+                            >
+                                { coins.map((coin, ix) => ( <MenuItem key={ix} value={ix}> { coin.symbol } </MenuItem>)) }
+                            </TextField>
+                        </TextField>
                     </Grid>
-                    <Grid item xs='3' sm='3' md='3' lg='3'  >
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
                         <TextField 
                             select
                             onChange={ (e) => this.handleOriginSelect(e) }
-                            selectProps={{ native: true }}
                             value={originSlot}
                         >
-                            { coins.map((coin, ix) => (
-                                <MenuItem key={ix} value={ix}>
-                                    { coin.symbol }
-                                </MenuItem>
-                            )) }
+                            { coins.map((coin, ix) => ( <MenuItem key={ix} value={ix}> { coin.symbol } </MenuItem>)) }
                         </TextField>
                     </Grid>
                 </Grid>
-                <Grid container>
-                    <Grid item xs='9' sm='9' md='9' lg='9'>
-
+                <Grid container spacing={3}>
+                    <Grid item xs={9} sm={9} md={9} lg={9}>
+                        <TextField label={coins[targetSlot].name}
+                            placeholder='0'
+                            className={classes.input}
+                            margin="normal"
+                            variant="outlined"
+                            type="number"
+                            onChange={ (e) => this.handleTargetInput(e) }
+                            value={targetAmount.toString() !== "0" ? targetAmount : ''}
+                            InputProps={{
+                                inputProps: { min: 0 }, 
+                                startAdornment: <InputAdornment position="start"> <img className={classes.iconInBox} src={coins[targetSlot].icon}/> </InputAdornment> 
+                            }}
+                        />
                     </Grid>
-                    <Grid item xs='9' sm='9' md='9'>
-                        <TextField 
-                            select
+                    <Grid item xs={3} sm={3} md={3} lg={3} >
+                        <TextField select
                             onChange={ (e) => this.handleTargetSelect(e) }
-                            selectProps={{ native: true }}
                             value={targetSlot}
                         >
-                            { coins.map((coin, ix) => (
-                                <MenuItem key={ix} value={ix}>
-                                    { coin.symbol }
-                                </MenuItem>
-                            )) }
+                            { coins.map((coin, ix) => ( <MenuItem key={ix} value={ix}> { coin.symbol } </MenuItem>)) }
                         </TextField>
-
                     </Grid>
                 </Grid>
                 <Grid container>

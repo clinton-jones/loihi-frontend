@@ -22,6 +22,7 @@ import InputAdornment from '@material-ui/core/InputAdornment'
 //     actionButtonContainer: { width: '100%', textAlign: 'center' },
 //     accountBalance: { float: 'right', },
 // })
+
 const styles = () => ({
   input: {
        width: '100%',
@@ -64,14 +65,8 @@ const styles = () => ({
 
 class WithdrawContainer extends React.Component {
 
-    setMax() {
-      const {store} = this.props
-      const chaiBalanceDecimal = store.get('chaiBalanceDecimal')
-      store.set('transferAmount', chaiBalanceDecimal)
-    }
-
     withdraw () {
-      proportionalWithdraw.bind(this)()
+      proportionalWithdraw.call(this)
     }
 
     render() {
@@ -85,8 +80,6 @@ class WithdrawContainer extends React.Component {
         const loihiUsdtBalance = store.get('loihiUsdtBalance')
         const loihiSusdBalance = store.get('loihiSusdBalance')
 
-        console.log("loihiDaiBalance")
-
         const walletAddress = store.get('walletAddress')
 
         const web3 = store.get('web3');
@@ -94,18 +87,16 @@ class WithdrawContainer extends React.Component {
 
         return (
           <Grid>
-            <Typography variant='h4'>Withdraw Shells</Typography>
-            <Typography variant='subtitle2'>Send Chai to any address</Typography>
             <Grid container className={classes.input} > 
               <TextField label="MultiCollateral Dai"
                   placeholder='0'
                   className={classes.input}
                   margin="normal"
-                  disabled
-                  value={'0'}
+                  disabled={true}
+                  value={loihiDaiBalance}
                   variant="outlined"
                   type="number"
-                  InputProps={{ 
+                  InputProps={{
                       inputProps: { min: 0 }, 
                       endAdornment: <InputAdornment position="end"> DAI </InputAdornment>,
                       startAdornment: <InputAdornment position="start"> <img className={classes.iconInBox} src={daiIcon}/> </InputAdornment> 
@@ -118,7 +109,7 @@ class WithdrawContainer extends React.Component {
                   placeholder='0'
                   className={classes.input}
                   margin="normal"
-                  value={'0'}
+                  value={loihiUsdcBalance}
                   variant="outlined"
                   type="number"
                   InputProps={{
@@ -130,11 +121,11 @@ class WithdrawContainer extends React.Component {
             </Grid>
             <Grid container className={classes.input} >
               <TextField label="Tether Stablecoin"
-                  disabled
+                  disabled={true}
                   placeholder='0'
                   className={classes.input}
                   margin="normal"
-                  value={'0'}
+                  value={loihiUsdtBalance}
                   variant="outlined"
                   type="number"
                   InputProps={{
@@ -146,11 +137,11 @@ class WithdrawContainer extends React.Component {
             </Grid>
             <Grid container className={classes.input}>
               <TextField label="Synthetix USD"
-                  disabled
+                  disabled={true}
                   placeholder='0'
                   className={classes.input}
                   margin="normal"
-                  value={'0'}
+                  value={loihiSusdBalance}
                   variant="outlined"
                   type="number"
                   InputProps={{

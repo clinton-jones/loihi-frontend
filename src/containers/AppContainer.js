@@ -60,7 +60,7 @@ class AppContainer extends React.Component {
         }
 
         return (
-            <Container maxWidth="xs">
+            <Container maxWidth={'xs'}>
                 <LoginStateContainer /> 
                 <Grid container >
                     <NavContainer />

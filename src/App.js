@@ -4,7 +4,7 @@ import Web3 from 'web3'
 
 import { WadDecimal, SixDecimal, EightDecimal } from './utils/web3Utils'
 
-import config from './kovan.config.json'
+import config from './mainnet.config.json'
 
 import AppContainer from './containers/AppContainer'
 
@@ -53,7 +53,9 @@ const initialState = {
     susdDepositAmount: new SixDecimal(0),
     viewState: 0,
     originSlot:0,
-    targetSlot: 1
+    targetSlot: 1,
+    originAmount: 0,
+    targetAmount: 0
 }
 
 class App extends React.Component {

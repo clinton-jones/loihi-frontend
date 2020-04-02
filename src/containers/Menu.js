@@ -5,7 +5,7 @@ import theme from '../theme/theme'
 import { initBrowserWallet } from '../utils/web3Utils'
 
 import { setViewState } from '../actions/main'
-import config from '../kovan.config.json'
+import config from '../mainnet.config.json'
 
 import Grid from '@material-ui/core/Grid'
 import Button from '@material-ui/core/Button'
@@ -32,7 +32,7 @@ const styles = () => ({
 class Menu extends React.Component {
 
   setViewState (int) {
-    setViewState.bind(this)(int)
+    setViewState.call(this, int)
   }
 
   render() {
